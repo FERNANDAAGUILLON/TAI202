@@ -1,0 +1,21 @@
+FROM python:3.12-slim
+
+#crear el contenedor 
+WORKDIR /app
+
+#copiar los requerimientos 
+COPY requirements.txt .
+
+# Instalamos las dependencias de Fastapi
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# copia el codigo del servidor 
+COPY ./app ./app
+
+# exponer el puerto del trabajo 
+EXPOSE 5000
+
+# ejecuatar levnatar servidor 
+CMD [ "uvicorn","app.main:app","--host","0.0.0.0","--port","5000","--reload"]
+
