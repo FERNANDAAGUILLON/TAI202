@@ -4,6 +4,9 @@
 from fastapi import FastAPI, HTTPException
 import asyncio
 from typing import Optional
+from pydantic import BaseModel,Field
+from pydantic import BaseModel, Field, EmailStr
+
 
 # INSTANCIA DEL SERVIDOR
 
@@ -22,6 +25,18 @@ usuarios = [
     {"id": 3, "nombre": "Dulce", "edad": 21},
 ]
 
+
+#Uso del modelo en el endpoint POST
+class crear_usuario(BaseModel):
+    id: int = Field(..., gt=0, description="Identificador de usuario")
+    nombre: str = Field(..., min_length=3, max_length=50, example="Juanita")
+    edad: int = Field(..., ge=1, le=123, description="Edad valida entre 1 y 123")
+
+# Pydantic para definir la estructura de los datos.
+class Usuario(BaseModel):
+    nombre: str
+    edad: int
+    email: str
 
 # ENDPOINTS GET
 
@@ -77,17 +92,17 @@ async def leer_usuarios():
 
 # POST - CREAR USUARIO
 
-@app.post("/v1/usuarios/", tags=['HTTP CRUD'])
-async def agregar_usuarios(usuario: dict):
+@app.post("/v1/usuarios/", tags=["HTTP CRUD"])
+async def agregar_usuarios(usuario: Usuario):
 
     for usr in usuarios:
-        if usr["id"] == usuario.get("id"):
+        if usr["id"] == usuario.id:
             raise HTTPException(
                 status_code=400,
                 detail="El id ya existe"
             )
 
-    usuarios.append(usuario)
+    usuarios.append(usuario.dict())
 
     return {
         "mensaje": "Usuario creado",
@@ -95,7 +110,7 @@ async def agregar_usuarios(usuario: dict):
     }
 
 
-# PUT - ACTUALIZAR COMPLETO
+# PUT - SE ACTUALIZA COMPLETO
 
 @app.put("/v1/usuarios/{id}", tags=['HTTP CRUD'])
 async def actualizar_usuario(id: int, usuario_actualizado: dict):
@@ -114,7 +129,7 @@ async def actualizar_usuario(id: int, usuario_actualizado: dict):
     )
 
 
-# PATCH - ACTUALIZAR PARCIAL
+# PATCH - ACTUALIZA PARCIAL 
 
 @app.patch("/v1/usuarios/{id}", tags=['HTTP CRUD'])
 async def actualizar_parcial(id: int, datos: dict):
@@ -133,7 +148,7 @@ async def actualizar_parcial(id: int, datos: dict):
     )
 
 
-# DELETE - ELIMINAR USUARIO
+# DELETE - SE ELIMINA EL USUARIO
 
 @app.delete("/v1/usuarios/{id}", tags=['HTTP CRUD'])
 async def eliminar_usuario(id: int):
