@@ -1,14 +1,17 @@
 
+# ==============================
 # IMPORTACIONES
+# ==============================
 
 from fastapi import FastAPI, HTTPException
 import asyncio
 from typing import Optional
-from pydantic import BaseModel,Field
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 
 
+# ==============================
 # INSTANCIA DEL SERVIDOR
+# ==============================
 
 app = FastAPI(
     title="Mi primer API",
@@ -17,7 +20,9 @@ app = FastAPI(
 )
 
 
+# ==============================
 # BASE DE DATOS FICTICIA
+# ==============================
 
 usuarios = [
     {"id": 1, "nombre": "Fany", "edad": 21},
@@ -26,20 +31,19 @@ usuarios = [
 ]
 
 
-#Uso del modelo en el endpoint POST
-class crear_usuario(BaseModel):
+# ==============================
+# MODELO PYDANTIC (VALIDACIONES)
+# ==============================
+
+class Usuario(BaseModel):
     id: int = Field(..., gt=0, description="Identificador de usuario")
     nombre: str = Field(..., min_length=3, max_length=50, example="Juanita")
     edad: int = Field(..., ge=1, le=123, description="Edad valida entre 1 y 123")
 
-# Pydantic para definir la estructura de los datos.
-class Usuario(BaseModel):
-    nombre: str
-    edad: int
-    email: str
 
+# ==============================
 # ENDPOINTS GET
-
+# ==============================
 
 @app.get("/")
 async def holamundo():
@@ -48,7 +52,7 @@ async def holamundo():
 
 @app.get("/bienvenido")
 async def bienvenido():
-    await asyncio.sleep(5)
+    await asyncio.sleep(2)
     return {
         "mensaje": "Bienvenido a FastAPI",
         "estatus": "200",
@@ -80,7 +84,11 @@ async def consultatodos(id: Optional[int] = None):
         return {"mensaje": "No se proporciono id", "status": "200"}
 
 
-# Leer todos los usuarios
+# ==============================
+# CRUD USUARIOS
+# ==============================
+
+# GET - Leer todos
 @app.get("/v1/usuarios/", tags=['HTTP CRUD'])
 async def leer_usuarios():
     return {
@@ -90,8 +98,7 @@ async def leer_usuarios():
     }
 
 
-# POST - CREAR USUARIO
-
+# POST - Crear usuario
 @app.post("/v1/usuarios/", tags=["HTTP CRUD"])
 async def agregar_usuarios(usuario: Usuario):
 
@@ -110,14 +117,13 @@ async def agregar_usuarios(usuario: Usuario):
     }
 
 
-# PUT - SE ACTUALIZA COMPLETO
-
+# PUT - Actualizar completo
 @app.put("/v1/usuarios/{id}", tags=['HTTP CRUD'])
-async def actualizar_usuario(id: int, usuario_actualizado: dict):
+async def actualizar_usuario(id: int, usuario_actualizado: Usuario):
 
     for index, usr in enumerate(usuarios):
         if usr["id"] == id:
-            usuarios[index] = usuario_actualizado
+            usuarios[index] = usuario_actualizado.dict()
             return {
                 "mensaje": "Usuario actualizado completamente",
                 "usuario": usuario_actualizado
@@ -129,8 +135,7 @@ async def actualizar_usuario(id: int, usuario_actualizado: dict):
     )
 
 
-# PATCH - ACTUALIZA PARCIAL 
-
+# PATCH - Actualización parcial
 @app.patch("/v1/usuarios/{id}", tags=['HTTP CRUD'])
 async def actualizar_parcial(id: int, datos: dict):
 
@@ -148,8 +153,7 @@ async def actualizar_parcial(id: int, datos: dict):
     )
 
 
-# DELETE - SE ELIMINA EL USUARIO
-
+# DELETE - Eliminar usuario
 @app.delete("/v1/usuarios/{id}", tags=['HTTP CRUD'])
 async def eliminar_usuario(id: int):
 

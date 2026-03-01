@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  biblioteca_api:
+    build: .
+    container_name: biblioteca_api
+    ports:
+      - "8000:8000"
