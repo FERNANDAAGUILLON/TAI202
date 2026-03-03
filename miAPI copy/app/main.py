@@ -3,14 +3,11 @@
 # IMPORTACIONES
 # ==============================
 
-import secrets
-
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, status, HTTPException,Depends
 import asyncio
-from fastapi import status
 from typing import Optional
 from pydantic import BaseModel, Field
-from fastapi.security import HTTPBasic,HTTPAuthorizationCredentials, HTTPBasicCredentials
+from fastapi.security import HTTPBasic,HTTPAuthorizationCredentials
 
 
 # ==============================
@@ -44,19 +41,6 @@ class Usuario(BaseModel):
     nombre: str = Field(..., min_length=3, max_length=50, example="Juanita")
     edad: int = Field(..., ge=1, le=123, description="Edad valida entre 1 y 123")
 
-# seguridad 
-security= HTTPBasic()
-def verificar_peticion(credenciales: HTTPBasicCredentials = Depends(security)):
-    usuario_correcto = secrets.compare_digest(credenciales.username,"MariaFernanda")
-    contrasena_correcta= secrets.compare_digest(credenciales.password,"123456")
-    
-    if not(usuario_correcto and contrasena_correcta):
-        raise HTTPException(
-            status_code= status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciales no validas",
-            
-        )
-    return credenciales.username
 
 # ==============================
 # ENDPOINTS GET
@@ -113,7 +97,6 @@ async def leer_usuarios():
         "usuarios": usuarios,
         "status": "200"
     }
-
 
 
 # POST - Crear usuario
@@ -173,18 +156,17 @@ async def actualizar_parcial(id: int, datos: dict):
 
 # DELETE - Eliminar usuario
 @app.delete("/v1/usuarios/{id}", tags=['HTTP CRUD'])
-async def eliminar_usuario(id: int,usuarioAuth: str = Depends(verificar_peticion)):
+async def eliminar_usuario(id: int):
 
     for index, usr in enumerate(usuarios):
         if usr["id"] == id:
             usuarios.pop(index)
             return {
-                "mensaje": f"Usuario eliminado por {usuarioAuth}",
+                "mensaje": "Usuario eliminado",
                 "id": id
             }
-    
+
     raise HTTPException(
-        status_code=401,
+        status_code=404,
         detail="Usuario no encontrado"
     )
-
