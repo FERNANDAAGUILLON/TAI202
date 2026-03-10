@@ -1,0 +1,8 @@
+services:
+   api:
+    build: 
+     container_name: examen2doparcial
+    ports:
+         - "8080:8080"
+   volumes:   
+         - .:/app:/app/app

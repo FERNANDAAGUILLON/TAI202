@@ -22,9 +22,9 @@ app = FastAPI(
     version="1.0"
 )
 
-# ===============================
+
 # BASE DE DATOS FICTICIA
-# ===============================
+
 
 usuarios = [
     {"id": 1, "nombre": "Fany", "edad": 21, "password": "123"},
@@ -252,3 +252,5 @@ async def eliminar_usuario(
         status_code=404,
         detail="Usuario no encontrado"
     )
+
+#docker compose up --build
