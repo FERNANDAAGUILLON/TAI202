@@ -1,6 +1,6 @@
-import secrets
-from fastapi import HTTPException, Depends, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import status, HTTPException, Depends #agrego
+from fastapi.security import HTTPBasic, HTTPAuthorizationCredentials,HTTPBasicCredentials#primer impor #agrego
+import secrets #se agrego
 
 security = HTTPBasic()
 
